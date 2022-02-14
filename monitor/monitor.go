@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 
@@ -27,16 +28,34 @@ func (m *Monitor) AddStream(s *Stream) {
 
 // New creates a new Monitor instance
 func New() *Monitor {
-	i := viper.GetString("instance")
+	i := viper.GetString("baseurl")
 	t := viper.GetString("token")
 	return &Monitor{instance: i, token: t}
 }
 
 // Run starts the monitoring process
 func (m *Monitor) Run() {
-	fmt.Println("[Info] starting monitor")
+	log.Info("starting monitor")
 	for {
+		go func() {
+			err := m.fetchStreams()
+			if err != nil {
+				log.Error(fmt.Errorf("fetch stream: %v", err))
+			}
+		}()
 		time.Sleep(time.Second * 10)
 		// todo
 	}
+}
+
+func (m *Monitor) fetchStreams() error {
+	m.streams = []*Stream{{
+		StreamID:    0,
+		Title:       "Eidi",
+		URL:         "https://live.stream.lrz.de/livetum/smil:70-dda14e25_all.smil/playlist.m3u8",
+		Until:       time.Now(),
+		LectureHall: "HS 2",
+		LastUpdate:  time.Now(),
+	}}
+	return nil
 }
