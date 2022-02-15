@@ -1,2 +1,3 @@
-baseurl: https://localhost:8081
-port: 8089
+baseurl: https://live.rbg.tum.de
+port: 8080
+token: abc-123-def-456

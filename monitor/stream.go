@@ -9,4 +9,7 @@ type Stream struct {
 	Until       time.Time `json:"until"`        // when stream is over -> stop monitoring
 	LectureHall string    `json:"lecture_hall"` // e.g. "MI HS 1"
 	LastUpdate  time.Time `json:"last_update"`
+	Cam         string    `json:"cam"`
+	Pres        string    `json:"pres"`
+	Comb        string    `json:"comb"`
 }

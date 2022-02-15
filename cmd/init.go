@@ -60,6 +60,19 @@ func runConfig() {
 	cobra.CheckErr(err)
 	viper.Set("port", port)
 
+	tokenPrompt := promptui.Prompt{
+		Label: "Enter API Token",
+		Validate: func(s string) error {
+			if len(s) < 1 {
+				return errors.New("invalid token")
+			}
+			return nil
+		},
+	}
+	token, err := tokenPrompt.Run()
+	cobra.CheckErr(err)
+	viper.Set("token", token)
+
 	dirs := []string{
 		"/etc/tum-live-monitor",
 	}

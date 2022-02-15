@@ -1,8 +1,10 @@
 package monitor
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"sync"
 	"time"
 
@@ -49,13 +51,40 @@ func (m *Monitor) Run() {
 }
 
 func (m *Monitor) fetchStreams() error {
-	m.streams = []*Stream{{
-		StreamID:    0,
-		Title:       "Eidi",
-		URL:         "https://live.stream.lrz.de/livetum/smil:70-dda14e25_all.smil/playlist.m3u8",
-		Until:       time.Now(),
-		LectureHall: "HS 2",
-		LastUpdate:  time.Now(),
-	}}
+	var res *[]liveStreamDto
+	hr, err := http.Get(m.instance + "/api/stream/live?token=" + m.token)
+	if err != nil {
+		return err
+	}
+	err = json.NewDecoder(hr.Body).Decode(&res)
+	if err != nil {
+		return err
+	}
+	if res == nil {
+		return nil
+	}
+	m.streams = make([]*Stream, len(*res))
+	for _, s := range *res {
+		m.streams = append(m.streams, &Stream{
+			StreamID:    s.ID,
+			Title:       s.CourseName,
+			Until:       s.End,
+			LectureHall: s.LectureHall,
+			LastUpdate:  time.Now(),
+			Cam:         s.CAM,
+			Pres:        s.PRES,
+			Comb:        s.COMB,
+		})
+	}
 	return nil
+}
+
+type liveStreamDto struct {
+	ID          uint
+	CourseName  string
+	LectureHall string
+	COMB        string
+	PRES        string
+	CAM         string
+	End         time.Time
 }
